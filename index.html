@@ -1,68 +1,162 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ProfesIA - Plataforma Vocacional con IA</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-  </head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProfesIA - Test Vocacional</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-  <body class="bg-gray-50 text-gray-800 font-sans">
+    const firebaseConfig = {
+      apiKey: "AIzaSyC84CZcet86uBU5WoeTFjJhK_sGWNUjmkU",
+      authDomain: "profesia-3db68.firebaseapp.com",
+      projectId: "profesia-3db68",
+      storageBucket: "profesia-3db68.appspot.com",
+      messagingSenderId: "834026103993",
+      appId: "1:834026103993:web:aa8601d98bb7899dbaa768"
+    };
 
-    <!-- Encabezado -->
-    <header class="bg-indigo-600 text-white py-6 shadow-md">
-      <div class="container mx-auto px-4">
-        <h1 class="text-3xl font-bold">ProfesIA</h1>
-        <p class="text-indigo-200">Ayudando al mundo del futuro</p>
-      </div>
-    </header>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    <!-- Contenido principal -->
-    <main class="container mx-auto px-4 py-10">
-      <section class="text-center mb-10">
-        <h2 class="text-2xl md:text-3xl font-semibold mb-4">Bienvenido a tu guía vocacional con IA</h2>
-        <p class="text-gray-600 max-w-xl mx-auto">
-          ProfesIA es una plataforma diseñada para ayudarte a descubrir tu camino profesional, brindarte apoyo emocional y prepararte para una vida con propósito. 
-          Empieza respondiendo nuestro test inteligente.
-        </p>
-        <div class="mt-6">
-          <a href="prueba.html" class="inline-block bg-indigo-700 text-white px-6 py-3 rounded hover:bg-indigo-800 transition duration-300">
-            Comenzar ahora
-          </a>
-        </div>
-      </section>
+    window.saveTestResult = async function(curp, edad, escolaridad, puntaje, perfil, fecha) {
+      try {
+        await addDoc(collection(db, "resultados_test"), {
+          curp,
+          edad,
+          escolaridad,
+          puntaje,
+          perfil,
+          fecha: new Date().toISOString()
+        });
+        console.log("Resultado guardado exitosamente");
+      } catch (e) {
+        console.error("Error al guardar en Firestore: ", e);
+      }
+    };
+  </script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold text-center text-purple-700 mb-6">ProfesIA - Test Vocacional</h1>
 
-      <!-- Registro por CURP -->
-      <section class="bg-white rounded shadow p-6 max-w-md mx-auto">
-        <h3 class="text-xl font-semibold mb-4 text-center">Registro de usuario</h3>
-        <form>
-          <label for="curp" class="block text-sm font-medium text-gray-700 mb-1">Ingresa tu CURP:</label>
-          <input
-            type="text"
-            id="curp"
-            name="curp"
-            placeholder="Ej. GODE561231HDFRRN09"
-            class="w-full px-4 py-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <button
-            type="submit"
-            class="w-full bg-indigo-700 text-white py-2 rounded hover:bg-indigo-800 transition duration-300"
-          >
-            Registrarme
-          </button>
-        </form>
-      </section>
-    </main>
+    <!-- Registro CURP -->
+    <div class="bg-white p-6 rounded shadow-md max-w-md mx-auto mb-8">
+      <h2 class="text-xl font-semibold mb-4">Registro de Usuario</h2>
+      <input id="curp" type="text" placeholder="Ingresa tu CURP" class="border rounded px-4 py-2 w-full mb-4">
+      <input id="escolaridad" type="text" placeholder="Nivel educativo actual" class="border rounded px-4 py-2 w-full mb-4">
+      <button onclick="comenzarTest()" class="bg-purple-600 text-white px-4 py-2 rounded w-full">Comenzar ahora</button>
+    </div>
 
-    <!-- Footer -->
-    <footer class="text-center text-sm text-gray-400 py-6">
-      © 2025 ProfesIA. Proyecto impulsado por ContaIA.
-    </footer>
+    <!-- Contenedor del test -->
+    <div id="testContainer" class="hidden bg-white p-6 rounded shadow-md max-w-2xl mx-auto">
+      <form id="formularioTest">
+        <div id="preguntas" class="space-y-6"></div>
+        <button type="submit" class="mt-6 bg-green-600 text-white px-4 py-2 rounded">Enviar respuestas</button>
+      </form>
+    </div>
 
-  </body>
+    <!-- Resultado -->
+    <div id="resultado" class="hidden bg-blue-100 p-6 rounded shadow-md max-w-2xl mx-auto mt-6">
+      <h2 class="text-2xl font-bold mb-2">Tu perfil profesional sugerido:</h2>
+      <p id="perfilSugerido" class="text-lg font-medium"></p>
+    </div>
+  </div>
+
+  <script>
+    const preguntas = [
+      "Me gusta resolver problemas matemáticos.",
+      "Disfruto trabajar con herramientas o maquinaria.",
+      "Prefiero actividades al aire libre.",
+      "Me interesa el comportamiento humano.",
+      "Disfruto crear arte o música.",
+      "Me interesa cómo funcionan los negocios.",
+      "Prefiero seguir procedimientos claros.",
+      "Disfruto trabajar con computadoras.",
+      "Me gusta ayudar a los demás.",
+      "Disfruto escribir historias o ensayos.",
+      "Me atrae la tecnología.",
+      "Quiero aprender idiomas extranjeros.",
+      "Me interesa la medicina o la salud.",
+      "Disfruto diseñar cosas.",
+      "Me gusta enseñar.",
+      "Prefiero ambientes estructurados.",
+      "Me gusta investigar sobre ciencia.",
+      "Me interesa el marketing y ventas.",
+      "Disfruto colaborar en equipo.",
+      "Me gusta la fotografía.",
+      "Quiero trabajar en seguridad o protección.",
+      "Me atraen las carreras militares.",
+      "Quiero estudiar desde casa (en línea).",
+      "Me interesa viajar al extranjero para estudiar.",
+      "Estoy dispuesto(a) a estudiar varios años.",
+      "Prefiero una carrera corta y técnica.",
+      "Quiero tener un trabajo flexible.",
+      "Busco estabilidad laboral.",
+      "Me gusta emprender.",
+      "Quiero una carrera con impacto social.",
+      "Me interesa el diseño gráfico.",
+      "Quiero trabajar con niños o adolescentes.",
+      "Disfruto la lectura.",
+      "Me interesa el deporte y la salud física.",
+      "Quiero ser reconocido públicamente por mi trabajo.",
+      "Deseo mejorar mi comunidad."
+    ];
+
+    function comenzarTest() {
+      const curp = document.getElementById("curp").value.trim();
+      const escolaridad = document.getElementById("escolaridad").value.trim();
+      if (!/^([A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]{2})$/.test(curp)) {
+        alert("Por favor, ingresa una CURP válida en mayúsculas.");
+        return;
+      }
+
+      const year = parseInt("19" + curp.substring(4, 6));
+      const edad = new Date().getFullYear() - year;
+
+      window.curpGlobal = curp;
+      window.edadGlobal = edad;
+      window.escolaridadGlobal = escolaridad;
+
+      document.getElementById("testContainer").classList.remove("hidden");
+
+      const div = document.getElementById("preguntas");
+      div.innerHTML = "";
+      preguntas.forEach((texto, i) => {
+        div.innerHTML += `
+          <div>
+            <label class="block mb-2">${i + 1}. ${texto}</label>
+            <select name="respuesta" class="w-full border rounded px-2 py-1">
+              <option value="0">Nada que ver</option>
+              <option value="1">Poco</option>
+              <option value="2">Algo</option>
+              <option value="3">Mucho</option>
+              <option value="4">Totalmente</option>
+            </select>
+          </div>`;
+      });
+    }
+
+    document.getElementById("formularioTest").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const respuestas = [...document.getElementsByName("respuesta")].map(s => parseInt(s.value));
+      const puntaje = respuestas.reduce((a, b) => a + b, 0);
+
+      let perfil = "";
+      if (puntaje <= 36) perfil = "Perfil práctico";
+      else if (puntaje <= 72) perfil = "Perfil técnico";
+      else if (puntaje <= 100) perfil = "Perfil social";
+      else perfil = "Perfil creativo";
+
+      document.getElementById("perfilSugerido").textContent = `${perfil}. Puntaje total: ${puntaje}`;
+      document.getElementById("resultado").classList.remove("hidden");
+
+      saveTestResult(curpGlobal, edadGlobal, escolaridadGlobal, puntaje, perfil, new Date());
+    });
+  </script>
+</body>
 </html>
 
 
