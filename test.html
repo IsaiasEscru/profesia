@@ -101,5 +101,63 @@
       resultBox.scrollIntoView({ behavior: "smooth" });
     });
   </script>
+ <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyC84Czet86uBU5WoeTFjJhK_sGWNUjmkU",
+    authDomain: "profesia-3db68.firebaseapp.com",
+    projectId: "profesia-3db68",
+    storageBucket: "profesia-3db68.appspot.com",
+    messagingSenderId: "834026103993",
+    appId: "1:834026103993:web:aa8601d98bb7899dbaa768"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const form = document.getElementById("testForm");
+  const container = document.getElementById("questions");
+  const resultBox = document.getElementById("result");
+  const suggestion = document.getElementById("careerSuggestion");
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const data = new FormData(form);
+    let score = 0;
+
+    for (let [_, value] of data.entries()) {
+      score += parseInt(value);
+    }
+
+    let career = "";
+    if (score <= 75) career = "Perfil práctico";
+    else if (score <= 105) career = "Perfil analítico";
+    else if (score <= 125) career = "Perfil social";
+    else career = "Perfil creativo";
+
+    suggestion.innerText = career;
+    resultBox.classList.remove("hidden");
+    resultBox.scrollIntoView({ behavior: "smooth" });
+
+    const curp = prompt("Ingresa tu CURP para guardar tu resultado:");
+    const timestamp = new Date();
+
+    try {
+      await db.collection("resultados_test").add({
+        curp,
+        puntaje: score,
+        resultado: career,
+        fecha: timestamp.toISOString()
+      });
+      console.log("Datos guardados en Firebase");
+    } catch (error) {
+      console.error("Error al guardar:", error);
+    }
+  });
+</script>
+ 
 </body>
 </html>
