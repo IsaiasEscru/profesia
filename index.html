@@ -1,4 +1,81 @@
-<script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProfesIA - Test Vocacional</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC84CZcet86uBU5WoeTFjJhK_sGWNUjmkU",
+      authDomain: "profesia-3db68.firebaseapp.com",
+      projectId: "profesia-3db68",
+      storageBucket: "profesia-3db68.appspot.com",
+      messagingSenderId: "834026103993",
+      appId: "1:834026103993:web:aa8601d98bb7899dbaa768"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.saveTestResult = async function(nombre, curp, edad, escolaridad, puntaje, perfil, fecha) {
+      try {
+        await addDoc(collection(db, "resultados_test"), {
+          nombre,
+          curp,
+          edad,
+          escolaridad,
+          puntaje,
+          perfil,
+          fecha: new Date().toLocaleString('es-MX')
+        });
+        console.log("Resultado guardado exitosamente");
+      } catch (e) {
+        console.error("Error al guardar en Firestore: ", e);
+      }
+    };
+  </script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold text-center text-purple-700 mb-6">ProfesIA - Test Vocacional</h1>
+
+    <div class="bg-white p-6 rounded shadow-md max-w-md mx-auto mb-8">
+      <h2 class="text-xl font-semibold mb-4">Registro de Usuario</h2>
+      <input id="nombre" type="text" placeholder="Nombre completo" class="border rounded px-4 py-2 w-full mb-4">
+      <input id="curp" type="text" placeholder="Ingresa tu CURP" class="border rounded px-4 py-2 w-full mb-4">
+      <select id="escolaridad" class="border rounded px-4 py-2 w-full mb-4">
+        <option value="">Selecciona tu nivel educativo</option>
+        <option value="Secundaria">Secundaria</option>
+        <option value="Preparatoria">Preparatoria</option>
+        <option value="Carrera Técnica">Carrera Técnica</option>
+        <option value="Universidad">Universidad</option>
+        <option value="Otro">Otro</option>
+      </select>
+      <button onclick="comenzarTest()" class="bg-purple-600 text-white px-4 py-2 rounded w-full">Comenzar ahora</button>
+    </div>
+
+    <div id="testContainer" class="hidden bg-white p-6 rounded shadow-md max-w-2xl mx-auto">
+      <form id="formularioTest">
+        <div id="preguntas" class="space-y-6"></div>
+        <button type="submit" class="mt-6 bg-green-600 text-white px-4 py-2 rounded">Enviar respuestas</button>
+      </form>
+    </div>
+
+    <div id="resultado" class="hidden bg-blue-100 p-6 rounded shadow-md max-w-2xl mx-auto mt-6">
+      <h2 class="text-2xl font-bold mb-2">Tu perfil profesional sugerido:</h2>
+      <p id="perfilSugerido" class="text-lg font-medium"></p>
+      <div class="mt-4">
+        <h3 class="text-xl font-semibold mb-2">Carreras recomendadas para ti:</h3>
+        <div id="carrerasSugeridas" class="text-base"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
     const preguntas = [
       "¿Te gustaría saber cómo funcionan las cosas como motores, bicis o aparatos?",
       "¿Te gusta arreglar cosas cuando se descomponen?",
@@ -111,7 +188,8 @@
       saveTestResult(nombreGlobal, curpGlobal, edadGlobal, escolaridadGlobal, puntaje, perfil, new Date());
       mostrarCarreras(perfil);
     });
-</script>
-
+  </script>
+</body>
+</html>
 
 
