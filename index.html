@@ -42,6 +42,68 @@
       © 2025 ProfesIA. Proyecto impulsado por ContaIA.
     </div>
   </footer>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+<script>
+  // Configuración de tu Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyC84Czet86uBU5WoeTFjJhK_sGWNUjmkU",
+    authDomain: "profesia-3db68.firebaseapp.com",
+    projectId: "profesia-3db68",
+    storageBucket: "profesia-3db68.appspot.com",
+    messagingSenderId: "834026103993",
+    appId: "1:834026103993:web:aa8601d98bb7899dbaa768"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // Función para calcular edad desde la CURP
+  function calcularEdadDesdeCurp(curp) {
+    const fechaCurp = curp.substring(4, 10); // YYMMDD
+    const año = parseInt(fechaCurp.substring(0, 2), 10);
+    const mes = parseInt(fechaCurp.substring(2, 4), 10) - 1;
+    const dia = parseInt(fechaCurp.substring(4, 6), 10);
+
+    const añoReal = año >= 0 && año <= 25 ? 2000 + año : 1900 + año;
+    const nacimiento = new Date(añoReal, mes, dia);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const m = hoy.getMonth() - nacimiento.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    return edad;
+  }
+
+  // Evento de envío del formulario
+  document.getElementById("registroForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const curp = document.getElementById("curp").value.trim().toUpperCase();
+    const nombre = document.getElementById("nombre").value.trim();
+    const nivel = document.getElementById("nivel").value;
+    const edad = calcularEdadDesdeCurp(curp);
+    const fechaRegistro = new Date().toISOString();
+
+    try {
+      await db.collection("usuarios").doc(curp).set({
+        nombre: nombre,
+        nivel_educativo: nivel,
+        edad: edad,
+        fecha_registro: fechaRegistro
+      });
+
+      alert("Registro exitoso. Ya puedes continuar con el test.");
+      window.location.href = "test.html"; // redirige al test
+    } catch (error) {
+      console.error("Error al guardar en Firestore:", error);
+      alert("Hubo un error al registrar tus datos.");
+    }
+  });
+</script>
 
 </body>
 </html>
