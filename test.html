@@ -37,16 +37,32 @@
 
         if (total <= 90) {
           perfil = "Perfil práctico: carreras técnicas, operativas, logística";
-          carreras = ["Técnico en electricidad", "Soldadura industrial", "Operador de maquinaria pesada"];
+          carreras = [
+            { nombre: "Técnico en electricidad", sueldo: "$12,000", descanso: "1 día", probabilidad: "80%" },
+            { nombre: "Soldadura industrial", sueldo: "$14,000", descanso: "1 día", probabilidad: "75%" },
+            { nombre: "Operador de maquinaria pesada", sueldo: "$16,000", descanso: "2 días", probabilidad: "70%" }
+          ];
         } else if (total <= 135) {
           perfil = "Perfil analítico: ingenierías, finanzas, programación";
-          carreras = ["Ingeniería en sistemas", "Actuaría", "Economía"];
+          carreras = [
+            { nombre: "Ingeniería en sistemas", sueldo: "$22,000", descanso: "2 días", probabilidad: "85%" },
+            { nombre: "Actuaría", sueldo: "$25,000", descanso: "2 días", probabilidad: "78%" },
+            { nombre: "Economía", sueldo: "$21,000", descanso: "1 día", probabilidad: "73%" }
+          ];
         } else if (total <= 165) {
           perfil = "Perfil social: psicología, educación, trabajo social";
-          carreras = ["Psicología", "Pedagogía", "Trabajo social"];
+          carreras = [
+            { nombre: "Psicología", sueldo: "$18,000", descanso: "2 días", probabilidad: "80%" },
+            { nombre: "Pedagogía", sueldo: "$14,000", descanso: "2 días", probabilidad: "82%" },
+            { nombre: "Trabajo social", sueldo: "$13,000", descanso: "2 días", probabilidad: "76%" }
+          ];
         } else {
           perfil = "Perfil creativo: diseño, publicidad, arte, comunicación";
-          carreras = ["Diseño gráfico", "Publicidad", "Comunicación visual"];
+          carreras = [
+            { nombre: "Diseño gráfico", sueldo: "$16,000", descanso: "2 días", probabilidad: "70%" },
+            { nombre: "Publicidad", sueldo: "$18,000", descanso: "1 día", probabilidad: "65%" },
+            { nombre: "Comunicación visual", sueldo: "$17,000", descanso: "2 días", probabilidad: "68%" }
+          ];
         }
 
         const resultado = document.getElementById("resultado");
@@ -57,7 +73,7 @@
         carreras.forEach(c => {
           const li = document.createElement("li");
           li.classList = "list-disc ml-5 mt-1 text-gray-700";
-          li.textContent = c;
+          li.innerHTML = `${c.nombre} <br><span class='text-sm text-gray-500'>Sueldo promedio: ${c.sueldo}, Descanso: ${c.descanso}, Probabilidad de éxito: ${c.probabilidad}</span>`;
           carrerasLista.appendChild(li);
         });
         resultado.classList.remove("hidden");
@@ -168,5 +184,6 @@
     </script>
   </body>
 </html>
+
 
 
