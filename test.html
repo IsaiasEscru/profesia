@@ -33,15 +33,34 @@
         }
 
         let perfil = "";
-        if (total <= 90) perfil = "Perfil práctico: carreras técnicas, operativas, logística";
-        else if (total <= 135) perfil = "Perfil analítico: ingenierías, finanzas, programación";
-        else if (total <= 165) perfil = "Perfil social: psicología, educación, trabajo social";
-        else perfil = "Perfil creativo: diseño, publicidad, arte, comunicación";
+        let carreras = [];
+
+        if (total <= 90) {
+          perfil = "Perfil práctico: carreras técnicas, operativas, logística";
+          carreras = ["Técnico en electricidad", "Soldadura industrial", "Operador de maquinaria pesada"];
+        } else if (total <= 135) {
+          perfil = "Perfil analítico: ingenierías, finanzas, programación";
+          carreras = ["Ingeniería en sistemas", "Actuaría", "Economía"];
+        } else if (total <= 165) {
+          perfil = "Perfil social: psicología, educación, trabajo social";
+          carreras = ["Psicología", "Pedagogía", "Trabajo social"];
+        } else {
+          perfil = "Perfil creativo: diseño, publicidad, arte, comunicación";
+          carreras = ["Diseño gráfico", "Publicidad", "Comunicación visual"];
+        }
 
         const resultado = document.getElementById("resultado");
         const perfilTexto = document.getElementById("perfil");
-        resultado.classList.remove("hidden");
+        const carrerasLista = document.getElementById("carreras");
         perfilTexto.textContent = perfil;
+        carrerasLista.innerHTML = "";
+        carreras.forEach(c => {
+          const li = document.createElement("li");
+          li.classList = "list-disc ml-5 mt-1 text-gray-700";
+          li.textContent = c;
+          carrerasLista.appendChild(li);
+        });
+        resultado.classList.remove("hidden");
 
         try {
           const curp = localStorage.getItem("curp") || "no_registrado";
@@ -49,6 +68,7 @@
             curp,
             puntaje: total,
             perfil,
+            carreras,
             fecha: new Date().toISOString()
           });
           console.log("Guardado en Firestore exitosamente.");
@@ -77,7 +97,9 @@
           class="mt-10 p-4 bg-white rounded shadow hidden"
         >
           <h2 class="text-xl font-semibold mb-2">Tu perfil sugerido:</h2>
-          <p id="perfil" class="text-gray-700"></p>
+          <p id="perfil" class="text-gray-700 mb-4"></p>
+          <h3 class="font-semibold">Carreras sugeridas:</h3>
+          <ul id="carreras" class="mt-2"></ul>
         </div>
       </section>
     </main>
@@ -146,4 +168,5 @@
     </script>
   </body>
 </html>
+
 
