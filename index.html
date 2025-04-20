@@ -30,7 +30,7 @@
           escolaridad,
           puntaje,
           perfil,
-          fecha: new Date().toISOString()
+          fecha: new Date().toLocaleString('es-MX')
         });
         console.log("Resultado guardado exitosamente");
       } catch (e) {
@@ -43,7 +43,6 @@
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-4xl font-bold text-center text-purple-700 mb-6">ProfesIA - Test Vocacional</h1>
 
-    <!-- Registro CURP -->
     <div class="bg-white p-6 rounded shadow-md max-w-md mx-auto mb-8">
       <h2 class="text-xl font-semibold mb-4">Registro de Usuario</h2>
       <input id="nombre" type="text" placeholder="Nombre completo" class="border rounded px-4 py-2 w-full mb-4">
@@ -59,7 +58,6 @@
       <button onclick="comenzarTest()" class="bg-purple-600 text-white px-4 py-2 rounded w-full">Comenzar ahora</button>
     </div>
 
-    <!-- Contenedor del test -->
     <div id="testContainer" class="hidden bg-white p-6 rounded shadow-md max-w-2xl mx-auto">
       <form id="formularioTest">
         <div id="preguntas" class="space-y-6"></div>
@@ -67,7 +65,6 @@
       </form>
     </div>
 
-    <!-- Resultado -->
     <div id="resultado" class="hidden bg-blue-100 p-6 rounded shadow-md max-w-2xl mx-auto mt-6">
       <h2 class="text-2xl font-bold mb-2">Tu perfil profesional sugerido:</h2>
       <p id="perfilSugerido" class="text-lg font-medium"></p>
@@ -75,7 +72,44 @@
   </div>
 
   <script>
-    const preguntas = [...Array(36).keys()].map(i => `Pregunta ${i + 1}`);
+    const preguntas = [
+      "¿Te interesa cómo funcionan las máquinas y herramientas?",
+      "¿Disfrutas resolver problemas técnicos o mecánicos?",
+      "¿Te gusta construir o reparar cosas con tus manos?",
+      "¿Prefieres el trabajo físico al trabajo de oficina?",
+      "¿Te atraen las actividades al aire libre con movimiento constante?",
+      "¿Te ves operando maquinaria o equipos especializados?",
+      "¿Te interesa la programación o el desarrollo de software?",
+      "¿Te gustan las matemáticas o resolver problemas con lógica?",
+      "¿Te resulta interesante el análisis de datos y estadísticas?",
+      "¿Prefieres tareas que requieren razonamiento más que intuición?",
+      "¿Te atrae el trabajo en laboratorios o investigación científica?",
+      "¿Te motiva mejorar sistemas para que funcionen mejor?",
+      "¿Te gusta colaborar con otras personas para alcanzar un objetivo?",
+      "¿Sientes satisfacción al ayudar a personas con dificultades?",
+      "¿Te gustaría trabajar en el área de salud o desarrollo humano?",
+      "¿Te interesa la psicología, educación o trabajo social?",
+      "¿Te preocupan los problemas de tu comunidad o entorno?",
+      "¿Te motiva influir positivamente en la vida de otras personas?",
+      "¿Te gusta el arte en cualquiera de sus formas?",
+      "¿Disfrutas escribir, dibujar, pintar, diseñar o crear contenido?",
+      "¿Te interesa contar historias o comunicar ideas de forma visual?",
+      "¿Prefieres trabajos donde puedas expresar emociones o ideas?",
+      "¿Te gusta inventar, improvisar o experimentar cosas nuevas?",
+      "¿Sientes afinidad por la música, actuación o fotografía?",
+      "¿Te gusta liderar proyectos o tomar decisiones importantes?",
+      "¿Te imaginas emprendiendo un negocio propio en el futuro?",
+      "¿Te sientes cómodo organizando personas o tareas?",
+      "¿Te interesa el mundo de las ventas o el marketing?",
+      "¿Te ves trabajando en el mundo corporativo o en empresas grandes?",
+      "¿Disfrutas asumir responsabilidades y liderar a otros?",
+      "¿Te interesa aprender por tu cuenta constantemente?",
+      "¿Te sientes motivado al desarrollar nuevas habilidades?",
+      "¿Te gusta enseñar lo que sabes a otras personas?",
+      "¿Te interesan los idiomas, viajes o culturas extranjeras?",
+      "¿Te estimula conocer de muchas áreas diferentes?",
+      "¿Te sientes más cómodo trabajando en equipo que de forma individual?"
+    ];
 
     function comenzarTest() {
       const nombre = document.getElementById("nombre").value.trim();
@@ -130,7 +164,7 @@
       else if (puntaje <= 100) perfil = "Perfil social";
       else perfil = "Perfil creativo";
 
-      document.getElementById("perfilSugerido").textContent = `${perfil}. Puntaje total: ${puntaje}`;
+      document.getElementById("perfilSugerido").textContent = `${nombreGlobal} (${edadGlobal} años): ${perfil}. Puntaje total: ${puntaje}`;
       document.getElementById("resultado").classList.remove("hidden");
 
       saveTestResult(nombreGlobal, curpGlobal, edadGlobal, escolaridadGlobal, puntaje, perfil, new Date());
@@ -138,6 +172,5 @@
   </script>
 </body>
 </html>
-
 
 
