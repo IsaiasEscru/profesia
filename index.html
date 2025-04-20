@@ -21,9 +21,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    window.saveTestResult = async function(curp, edad, escolaridad, puntaje, perfil, fecha) {
+    window.saveTestResult = async function(nombre, curp, edad, escolaridad, puntaje, perfil, fecha) {
       try {
         await addDoc(collection(db, "resultados_test"), {
+          nombre,
           curp,
           edad,
           escolaridad,
@@ -45,8 +46,16 @@
     <!-- Registro CURP -->
     <div class="bg-white p-6 rounded shadow-md max-w-md mx-auto mb-8">
       <h2 class="text-xl font-semibold mb-4">Registro de Usuario</h2>
+      <input id="nombre" type="text" placeholder="Nombre completo" class="border rounded px-4 py-2 w-full mb-4">
       <input id="curp" type="text" placeholder="Ingresa tu CURP" class="border rounded px-4 py-2 w-full mb-4">
-      <input id="escolaridad" type="text" placeholder="Nivel educativo actual" class="border rounded px-4 py-2 w-full mb-4">
+      <select id="escolaridad" class="border rounded px-4 py-2 w-full mb-4">
+        <option value="">Selecciona tu nivel educativo</option>
+        <option value="Secundaria">Secundaria</option>
+        <option value="Preparatoria">Preparatoria</option>
+        <option value="Carrera Técnica">Carrera Técnica</option>
+        <option value="Universidad">Universidad</option>
+        <option value="Otro">Otro</option>
+      </select>
       <button onclick="comenzarTest()" class="bg-purple-600 text-white px-4 py-2 rounded w-full">Comenzar ahora</button>
     </div>
 
@@ -66,48 +75,18 @@
   </div>
 
   <script>
-    const preguntas = [
-      "Me gusta resolver problemas matemáticos.",
-      "Disfruto trabajar con herramientas o maquinaria.",
-      "Prefiero actividades al aire libre.",
-      "Me interesa el comportamiento humano.",
-      "Disfruto crear arte o música.",
-      "Me interesa cómo funcionan los negocios.",
-      "Prefiero seguir procedimientos claros.",
-      "Disfruto trabajar con computadoras.",
-      "Me gusta ayudar a los demás.",
-      "Disfruto escribir historias o ensayos.",
-      "Me atrae la tecnología.",
-      "Quiero aprender idiomas extranjeros.",
-      "Me interesa la medicina o la salud.",
-      "Disfruto diseñar cosas.",
-      "Me gusta enseñar.",
-      "Prefiero ambientes estructurados.",
-      "Me gusta investigar sobre ciencia.",
-      "Me interesa el marketing y ventas.",
-      "Disfruto colaborar en equipo.",
-      "Me gusta la fotografía.",
-      "Quiero trabajar en seguridad o protección.",
-      "Me atraen las carreras militares.",
-      "Quiero estudiar desde casa (en línea).",
-      "Me interesa viajar al extranjero para estudiar.",
-      "Estoy dispuesto(a) a estudiar varios años.",
-      "Prefiero una carrera corta y técnica.",
-      "Quiero tener un trabajo flexible.",
-      "Busco estabilidad laboral.",
-      "Me gusta emprender.",
-      "Quiero una carrera con impacto social.",
-      "Me interesa el diseño gráfico.",
-      "Quiero trabajar con niños o adolescentes.",
-      "Disfruto la lectura.",
-      "Me interesa el deporte y la salud física.",
-      "Quiero ser reconocido públicamente por mi trabajo.",
-      "Deseo mejorar mi comunidad."
-    ];
+    const preguntas = [...Array(36).keys()].map(i => `Pregunta ${i + 1}`);
 
     function comenzarTest() {
+      const nombre = document.getElementById("nombre").value.trim();
       const curp = document.getElementById("curp").value.trim();
       const escolaridad = document.getElementById("escolaridad").value.trim();
+
+      if (!nombre || !curp || !escolaridad) {
+        alert("Por favor completa todos los campos antes de continuar.");
+        return;
+      }
+
       if (!/^([A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]{2})$/.test(curp)) {
         alert("Por favor, ingresa una CURP válida en mayúsculas.");
         return;
@@ -116,6 +95,7 @@
       const year = parseInt("19" + curp.substring(4, 6));
       const edad = new Date().getFullYear() - year;
 
+      window.nombreGlobal = nombre;
       window.curpGlobal = curp;
       window.edadGlobal = edad;
       window.escolaridadGlobal = escolaridad;
@@ -153,10 +133,11 @@
       document.getElementById("perfilSugerido").textContent = `${perfil}. Puntaje total: ${puntaje}`;
       document.getElementById("resultado").classList.remove("hidden");
 
-      saveTestResult(curpGlobal, edadGlobal, escolaridadGlobal, puntaje, perfil, new Date());
+      saveTestResult(nombreGlobal, curpGlobal, edadGlobal, escolaridadGlobal, puntaje, perfil, new Date());
     });
   </script>
 </body>
 </html>
+
 
 
