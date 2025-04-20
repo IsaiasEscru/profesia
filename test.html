@@ -1,163 +1,149 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Test Vocacional - ProfesIA</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <style>
-    body { scroll-behavior: smooth; }
-    .hidden { display: none; }
-  </style>
-</head>
-<body class="bg-gray-100 text-gray-800 font-sans">
-  <div class="max-w-2xl mx-auto py-10 px-6">
-    <h1 class="text-3xl font-bold text-center text-indigo-700 mb-6">Test Vocacional con IA</h1>
-    <form id="testForm">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Vocacional - ProfesIA</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+      import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
-      <!-- Preguntas generadas dinámicamente -->
-      <div id="questions"></div>
+      const firebaseConfig = {
+        apiKey: "AIzaSyC84CZet86uBU5WoeTFjJhK_sGWNUjmkU",
+        authDomain: "profesia-3db68.firebaseapp.com",
+        projectId: "profesia-3db68",
+        storageBucket: "profesia-3db68.appspot.com",
+        messagingSenderId: "834026103993",
+        appId: "1:834026103993:web:aa8601d98bb7899dbaa768"
+      };
 
-      <button type="submit" class="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700">Ver resultado</button>
-    </form>
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
 
-    <div id="result" class="mt-10 hidden p-6 bg-white shadow rounded text-center">
-      <h2 class="text-2xl font-bold text-green-600 mb-4">Tu perfil sugerido es:</h2>
-      <p id="careerSuggestion" class="text-lg"></p>
-    </div>
-  </div>
+      window.enviarRespuestas = async function () {
+        const form = document.getElementById("test-form");
+        const data = new FormData(form);
+        let total = 0;
+        for (let valor of data.values()) {
+          total += parseInt(valor);
+        }
 
-  <script>
-    const questions = [
-      "Me gusta resolver problemas lógicos o matemáticos.",
-      "Disfruto dibujar, pintar o diseñar cosas.",
-      "Me interesa ayudar a las personas cuando lo necesitan.",
-      "Me gusta armar o desarmar cosas para entender cómo funcionan.",
-      "Prefiero actividades al aire libre y con movimiento.",
-      "Disfruto organizar eventos o gestionar tareas de un equipo.",
-      "Soy bueno/a analizando información y detectando errores.",
-      "Tengo facilidad para comunicar ideas de forma clara.",
-      "Aprendo rápido el uso de herramientas tecnológicas.",
-      "Me llevo bien con niños o adolescentes.",
-      "Tiendo a ser detallista y perfeccionista.",
-      "Tengo habilidad para coordinar personas en proyectos.",
-      "Me gustaría trabajar desde casa con flexibilidad.",
-      "Quiero un trabajo donde pueda viajar seguido.",
-      "Prefiero trabajos con estabilidad y seguridad a largo plazo.",
-      "Valoro tener ingresos altos aunque implique mucho esfuerzo.",
-      "Quiero tiempo libre para mi familia o proyectos personales.",
-      "Aspiro a liderar mi propia empresa o equipo.",
-      "Me motiva dejar un impacto positivo en el mundo.",
-      "Prefiero un trabajo que me apasione aunque no sea tan bien pagado.",
-      "La innovación y la tecnología me inspiran.",
-      "Siento vocación por ayudar a otros a crecer.",
-      "Me mueve la idea de justicia y equidad.",
-      "Me gusta aprender constantemente y superarme.",
-      "Tiendo a buscar soluciones rápidas bajo presión.",
-      "Cuando algo no sale bien, me esfuerzo hasta resolverlo.",
-      "Acepto críticas si me ayudan a mejorar.",
-      "Soy creativo/a para resolver situaciones nuevas.",
-      "Me adapto fácil a entornos nuevos o desconocidos.",
-      "Me gusta tomar decisiones y asumir responsabilidades."
-    ];
+        let perfil = "";
+        if (total <= 90) perfil = "Perfil práctico: carreras técnicas, operativas, logística";
+        else if (total <= 135) perfil = "Perfil analítico: ingenierías, finanzas, programación";
+        else if (total <= 165) perfil = "Perfil social: psicología, educación, trabajo social";
+        else perfil = "Perfil creativo: diseño, publicidad, arte, comunicación";
 
-    const form = document.getElementById("testForm");
-    const container = document.getElementById("questions");
-    const resultBox = document.getElementById("result");
-    const suggestion = document.getElementById("careerSuggestion");
+        const resultado = document.getElementById("resultado");
+        const perfilTexto = document.getElementById("perfil");
+        resultado.classList.remove("hidden");
+        perfilTexto.textContent = perfil;
 
-    questions.forEach((q, i) => {
-      const div = document.createElement("div");
-      div.className = "mb-4";
-      div.innerHTML = `
-        <label class="block font-medium mb-1">${i + 1}. ${q}</label>
-        <select name="q${i}" class="w-full border p-2 rounded">
-          <option value="1">Totalmente en desacuerdo</option>
-          <option value="2">En desacuerdo</option>
-          <option value="3">Neutral</option>
-          <option value="4">De acuerdo</option>
-          <option value="5">Totalmente de acuerdo</option>
-        </select>
-      `;
-      container.appendChild(div);
-    });
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const data = new FormData(form);
-      let score = 0;
-      for (let [_, value] of data.entries()) {
-        score += parseInt(value);
+        try {
+          const curp = localStorage.getItem("curp") || "no_registrado";
+          await addDoc(collection(db, "resultados_test"), {
+            curp,
+            puntaje: total,
+            perfil,
+            fecha: new Date().toISOString()
+          });
+          console.log("Guardado en Firestore exitosamente.");
+        } catch (error) {
+          console.error("Error al guardar en Firestore:", error);
+        }
       }
+    </script>
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans">
+    <main class="container mx-auto px-4 py-10">
+      <section class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-6">Test Vocacional</h1>
+        <form id="test-form" class="space-y-6" onsubmit="event.preventDefault(); enviarRespuestas();">
+          <div class="space-y-4" id="preguntas"></div>
+          <button
+            type="submit"
+            class="w-full bg-indigo-700 text-white py-2 rounded hover:bg-indigo-800"
+          >
+            Enviar respuestas
+          </button>
+        </form>
 
-      let career = "";
-      if (score <= 75) career = "Perfil práctico: Carreras como logística, mantenimiento, enfermería o educación técnica.";
-      else if (score <= 105) career = "Perfil analítico: Carreras como ingeniería, finanzas, tecnología, investigación.";
-      else if (score <= 125) career = "Perfil social: Psicología, trabajo social, docencia, medicina, RH.";
-      else career = "Perfil creativo: Diseño, comunicación, publicidad, arte, arquitectura.";
+        <div
+          id="resultado"
+          class="mt-10 p-4 bg-white rounded shadow hidden"
+        >
+          <h2 class="text-xl font-semibold mb-2">Tu perfil sugerido:</h2>
+          <p id="perfil" class="text-gray-700"></p>
+        </div>
+      </section>
+    </main>
 
-      suggestion.innerText = career;
-      resultBox.classList.remove("hidden");
-      resultBox.scrollIntoView({ behavior: "smooth" });
-    });
-  </script>
- <!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+    <script>
+      const preguntas = [
+        "Me gusta resolver problemas matemáticos complejos",
+        "Prefiero trabajar en equipo que solo",
+        "Me interesa saber cómo funciona el cuerpo humano",
+        "Disfruto planear y organizar actividades",
+        "Me gusta ayudar a las personas a superar sus dificultades",
+        "Prefiero tareas prácticas sobre teóricas",
+        "Me interesa el mundo de la tecnología",
+        "Tengo facilidad para hablar en público",
+        "Me veo liderando un equipo en el futuro",
+        "Me interesa trabajar con niños o jóvenes",
+        "Disfruto tareas que requieren creatividad visual",
+        "Me interesa resolver conflictos y mediar problemas",
+        "Valoro el orden y la precisión en mi trabajo",
+        "Me interesa el diseño de espacios y arquitectura",
+        "Me veo emprendiendo mi propio negocio",
+        "Me interesa la programación y desarrollo web",
+        "Siento empatía con el sufrimiento ajeno",
+        "Disfruto aprender nuevos idiomas",
+        "Tengo buen manejo del estrés en situaciones críticas",
+        "Me gustaría explorar el espacio o trabajar con astronomía",
+        "Siento afinidad por la disciplina militar",
+        "Me atrae el trabajo con maquinaria o herramientas",
+        "Prefiero trabajos con estabilidad a largo plazo",
+        "Me gustaría trabajar en salud mental",
+        "Tengo facilidad para redactar y escribir contenido",
+        "Me interesa la investigación científica",
+        "Me gustaría trabajar en el extranjero",
+        "Disfruto la atención al cliente",
+        "Tengo interés por las leyes y justicia social",
+        "Me interesa la nutrición y el bienestar físico",
+        "Soy creativo con ideas para marketing",
+        "Me gusta el análisis de datos y estadísticas",
+        "Siento que tengo habilidades artísticas",
+        "Disfruto el trabajo físico o deportivo",
+        "Me interesa la inteligencia artificial",
+        "Valoro el crecimiento espiritual y personal"
+      ];
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyC84Czet86uBU5WoeTFjJhK_sGWNUjmkU",
-    authDomain: "profesia-3db68.firebaseapp.com",
-    projectId: "profesia-3db68",
-    storageBucket: "profesia-3db68.appspot.com",
-    messagingSenderId: "834026103993",
-    appId: "1:834026103993:web:aa8601d98bb7899dbaa768"
-  };
+      const preguntasDiv = document.getElementById("preguntas");
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-  const form = document.getElementById("testForm");
-  const container = document.getElementById("questions");
-  const resultBox = document.getElementById("result");
-  const suggestion = document.getElementById("careerSuggestion");
-
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const data = new FormData(form);
-    let score = 0;
-
-    for (let [_, value] of data.entries()) {
-      score += parseInt(value);
-    }
-
-    let career = "";
-    if (score <= 75) career = "Perfil práctico";
-    else if (score <= 105) career = "Perfil analítico";
-    else if (score <= 125) career = "Perfil social";
-    else career = "Perfil creativo";
-
-    suggestion.innerText = career;
-    resultBox.classList.remove("hidden");
-    resultBox.scrollIntoView({ behavior: "smooth" });
-
-    const curp = prompt("Ingresa tu CURP para guardar tu resultado:");
-    const timestamp = new Date();
-
-    try {
-      await db.collection("resultados_test").add({
-        curp,
-        puntaje: score,
-        resultado: career,
-        fecha: timestamp.toISOString()
+      preguntas.forEach((texto, i) => {
+        const preguntaHTML = `
+        <div>
+          <label class="block font-medium mb-1">${i + 1}. ${texto}</label>
+          <select
+            name="p${i}"
+            required
+            class="w-full border border-gray-300 rounded px-3 py-2"
+          >
+            <option value="">Selecciona una respuesta</option>
+            <option value="1">Totalmente en desacuerdo</option>
+            <option value="2">En desacuerdo</option>
+            <option value="3">Neutral</option>
+            <option value="4">De acuerdo</option>
+            <option value="5">Totalmente de acuerdo</option>
+          </select>
+        </div>`;
+        preguntasDiv.insertAdjacentHTML("beforeend", preguntaHTML);
       });
-      console.log("Datos guardados en Firebase");
-    } catch (error) {
-      console.error("Error al guardar:", error);
-    }
-  });
-</script>
- 
-</body>
+    </script>
+  </body>
 </html>
+
