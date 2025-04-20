@@ -1,115 +1,56 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ProfesIA - Test Vocacional</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyC84CZcet86uBU5WoeTFjJhK_sGWNUjmkU",
-      authDomain: "profesia-3db68.firebaseapp.com",
-      projectId: "profesia-3db68",
-      storageBucket: "profesia-3db68.appspot.com",
-      messagingSenderId: "834026103993",
-      appId: "1:834026103993:web:aa8601d98bb7899dbaa768"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window.saveTestResult = async function(nombre, curp, edad, escolaridad, puntaje, perfil, fecha) {
-      try {
-        await addDoc(collection(db, "resultados_test"), {
-          nombre,
-          curp,
-          edad,
-          escolaridad,
-          puntaje,
-          perfil,
-          fecha: new Date().toLocaleString('es-MX')
-        });
-        console.log("Resultado guardado exitosamente");
-      } catch (e) {
-        console.error("Error al guardar en Firestore: ", e);
-      }
-    };
-  </script>
-</head>
-<body class="bg-gray-100 text-gray-900 font-sans">
-  <div class="container mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold text-center text-purple-700 mb-6">ProfesIA - Test Vocacional</h1>
-
-    <div class="bg-white p-6 rounded shadow-md max-w-md mx-auto mb-8">
-      <h2 class="text-xl font-semibold mb-4">Registro de Usuario</h2>
-      <input id="nombre" type="text" placeholder="Nombre completo" class="border rounded px-4 py-2 w-full mb-4">
-      <input id="curp" type="text" placeholder="Ingresa tu CURP" class="border rounded px-4 py-2 w-full mb-4">
-      <select id="escolaridad" class="border rounded px-4 py-2 w-full mb-4">
-        <option value="">Selecciona tu nivel educativo</option>
-        <option value="Secundaria">Secundaria</option>
-        <option value="Preparatoria">Preparatoria</option>
-        <option value="Carrera Técnica">Carrera Técnica</option>
-        <option value="Universidad">Universidad</option>
-        <option value="Otro">Otro</option>
-      </select>
-      <button onclick="comenzarTest()" class="bg-purple-600 text-white px-4 py-2 rounded w-full">Comenzar ahora</button>
-    </div>
-
-    <div id="testContainer" class="hidden bg-white p-6 rounded shadow-md max-w-2xl mx-auto">
-      <form id="formularioTest">
-        <div id="preguntas" class="space-y-6"></div>
-        <button type="submit" class="mt-6 bg-green-600 text-white px-4 py-2 rounded">Enviar respuestas</button>
-      </form>
-    </div>
-
-    <div id="resultado" class="hidden bg-blue-100 p-6 rounded shadow-md max-w-2xl mx-auto mt-6">
-      <h2 class="text-2xl font-bold mb-2">Tu perfil profesional sugerido:</h2>
-      <p id="perfilSugerido" class="text-lg font-medium"></p>
-    </div>
-  </div>
-
-  <script>
+<script>
     const preguntas = [
       "¿Te gustaría saber cómo funcionan las cosas como motores, bicis o aparatos?",
       "¿Te gusta arreglar cosas cuando se descomponen?",
-      "¿Te divierte construir cosas con tus manos, como modelos o manualidades?",
-      "¿Prefieres actividades donde puedas moverte y no estar sentado tanto tiempo?",
-      "¿Disfrutas estar al aire libre haciendo cosas físicas o deportivas?",
-      "¿Te imaginas usando máquinas interesantes en tu trabajo?",
       "¿Te interesa aprender a programar o usar la computadora para crear cosas?",
-      "¿Te gustan las matemáticas o resolver acertijos con lógica?",
-      "¿Te parece interesante usar datos o gráficos para entender cosas?",
-      "¿Prefieres pensar bien una solución en lugar de adivinar?",
-      "¿Te imaginas trabajando en un laboratorio haciendo experimentos?",
-      "¿Te gustaría hacer que las cosas funcionen mejor con tus ideas?",
-      "¿Te gusta ayudar a tus amigos o compañeros cuando tienen un problema?",
       "¿Te hace sentir bien ayudar a alguien que necesita apoyo?",
-      "¿Te gustaría cuidar personas o enseñar a otros lo que sabes?",
-      "¿Te interesa saber cómo piensan y sienten otras personas?",
-      "¿Te preocupas por lo que pasa en tu escuela o tu comunidad?",
-      "¿Sientes que puedes hacer que el mundo sea un mejor lugar para otros?",
-      "¿Te gusta dibujar, pintar, o hacer diseños creativos?",
-      "¿Disfrutas escribir historias, hacer videos o crear contenido?",
-      "¿Te interesa comunicar ideas con dibujos o presentaciones?",
-      "¿Prefieres trabajos donde puedas usar tu imaginación?",
-      "¿Te gusta inventar cosas nuevas o hacerlas a tu estilo?",
-      "¿Te gustaría actuar, tocar música o hacer algo artístico?",
-      "¿Te gusta organizar a tus compañeros para lograr algo juntos?",
-      "¿Te gustaría tener tu propio negocio o emprendimiento algún día?",
-      "¿Te sientes bien cuando tú tomas decisiones en un grupo?",
-      "¿Te llama la atención cómo se venden cosas o cómo funcionan las marcas?",
-      "¿Te imaginas trabajando en una empresa grande con muchos equipos?",
-      "¿Disfrutas tener responsabilidades y liderar a otros?",
-      "¿Te gusta aprender por tu cuenta cosas nuevas fuera de clase?",
-      "¿Sientes emoción cuando aprendes una habilidad nueva?",
-      "¿Te gusta explicar cosas a tus amigos o compañeros?",
-      "¿Te interesan los idiomas o te gustaría viajar y conocer otros países?",
-      "¿Te gusta saber un poco de todo y no solo de una cosa?",
-      "¿Prefieres trabajar en equipo y compartir ideas con otros?"
+      "¿Te gusta dibujar, pintar, o hacer diseños creativos?"
     ];
+
+    const carrerasPorPerfil = {
+      "Perfil práctico": [
+        { nombre: "Ingeniería Industrial", compatibilidad: 100 },
+        { nombre: "Ingeniería Mecánica", compatibilidad: 95 },
+        { nombre: "Ingeniería Civil", compatibilidad: 90 },
+        { nombre: "Ingeniería en Energías Renovables", compatibilidad: 85 },
+        { nombre: "Ingeniería en Mecatrónica", compatibilidad: 80 },
+        { nombre: "Ingeniería Electrónica", compatibilidad: 75 }
+      ],
+      "Perfil técnico": [
+        { nombre: "Ingeniería en Sistemas Computacionales", compatibilidad: 100 },
+        { nombre: "Ciencias de la Computación", compatibilidad: 95 },
+        { nombre: "Ingeniería en Software", compatibilidad: 90 },
+        { nombre: "Ingeniería en Robótica", compatibilidad: 85 },
+        { nombre: "Ingeniería en Telecomunicaciones", compatibilidad: 80 },
+        { nombre: "Ingeniería en Inteligencia Artificial", compatibilidad: 75 }
+      ],
+      "Perfil social": [
+        { nombre: "Psicología", compatibilidad: 100 },
+        { nombre: "Trabajo Social", compatibilidad: 95 },
+        { nombre: "Pedagogía", compatibilidad: 90 },
+        { nombre: "Enfermería", compatibilidad: 85 },
+        { nombre: "Educación Especial", compatibilidad: 80 },
+        { nombre: "Sociología", compatibilidad: 75 }
+      ],
+      "Perfil creativo": [
+        { nombre: "Diseño Gráfico", compatibilidad: 100 },
+        { nombre: "Arquitectura", compatibilidad: 95 },
+        { nombre: "Diseño Industrial", compatibilidad: 90 },
+        { nombre: "Comunicación Visual", compatibilidad: 85 },
+        { nombre: "Diseño de Modas", compatibilidad: 80 },
+        { nombre: "Artes Visuales", compatibilidad: 75 }
+      ]
+    };
+
+    function mostrarCarreras(perfil) {
+      const carreras = carrerasPorPerfil[perfil] || [];
+      let html = "<ul class='list-disc pl-5'>";
+      carreras.forEach(carrera => {
+        html += `<li>${carrera.nombre} - Compatibilidad: ${carrera.compatibilidad}%</li>`;
+      });
+      html += "</ul>";
+      document.getElementById("carrerasSugeridas").innerHTML = html;
+    }
 
     function comenzarTest() {
       const nombre = document.getElementById("nombre").value.trim();
@@ -159,18 +100,18 @@
       const puntaje = respuestas.reduce((a, b) => a + b, 0);
 
       let perfil = "";
-      if (puntaje <= 36) perfil = "Perfil práctico";
-      else if (puntaje <= 72) perfil = "Perfil técnico";
-      else if (puntaje <= 100) perfil = "Perfil social";
+      if (puntaje <= 5) perfil = "Perfil práctico";
+      else if (puntaje <= 10) perfil = "Perfil técnico";
+      else if (puntaje <= 15) perfil = "Perfil social";
       else perfil = "Perfil creativo";
 
       document.getElementById("perfilSugerido").textContent = `${nombreGlobal} (${edadGlobal} años): ${perfil}. Puntaje total: ${puntaje}`;
       document.getElementById("resultado").classList.remove("hidden");
 
       saveTestResult(nombreGlobal, curpGlobal, edadGlobal, escolaridadGlobal, puntaje, perfil, new Date());
+      mostrarCarreras(perfil);
     });
-  </script>
-</body>
-</html>
+</script>
+
 
 
